@@ -1,3 +1,10 @@
+__history
+*.~*
+*.local
+DP_Rep.stat
+DP_RepPass.h
+DP_Rep.dsk
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db

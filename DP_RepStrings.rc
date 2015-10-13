@@ -1,0 +1,31 @@
+#include "DP_RepStrings.h"
+
+STRINGTABLE
+BEGIN
+IDS_ERROR_MEMO_CLEAR,
+        "Нельзя сохранять или отправлять по почте пустой отчет"
+IDS_MAIL_TO,
+        "MAILTO:%s?SUBJECT=%s&BODY=%s"
+IDS_ERROR_DB_NOT_EXISTS,
+        "Нет доступа к базе данных ""%s"""
+IDS_UPDATE_WAIT,
+        "Получение данных..."
+IDS_REPORT_CAPTION,
+        "Загрузка доменных печей %s"
+IDS_ERROR_DB_OPEN,
+        "Произошла ошибка во время открытия базы данных: ""%s"""
+IDS_ERROR_DB_LOAD,
+        "Не удалось получить данные, так как произошла ошибка: ""%s"""
+IDS_DB_NO_RECORDS
+        "Нет данных"
+IDS_DB_RECORD
+        "%s: %s т."
+IDS_UPDATE_OK
+        "Готово"
+IDS_UPDATE_ERROR
+        "Ошибка"
+IDS_PING_ERROR
+        "%s  не отвечает.\nТелефон: %s"
+IDS_PING_RESULT
+        "Повторить проверку доступности?"
+END
