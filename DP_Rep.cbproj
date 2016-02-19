@@ -67,8 +67,9 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\release\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
+        <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
-        <VerInfo_Keys>CompanyName=П3тр0виЧъ;FileDescription=Сбор данных о загрузке доменных печей;FileVersion=2.0.0.0;InternalName=DP_Rep;LegalCopyright=© П3тр0виЧъ;LegalTrademarks=П3тр0виЧъ™;OriginalFilename=DP_Rep.exe;ProductName=Отчёты с доменных печей;ProductVersion=2.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=П3тр0виЧъ;FileDescription=Сбор данных о загрузке доменных печей;FileVersion=2.1.0.0;InternalName=DP_Rep;LegalCopyright=© П3тр0виЧъ;LegalTrademarks=П3тр0виЧъ™;OriginalFilename=DP_Rep.exe;ProductName=Отчёты с доменных печей;ProductVersion=2.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_Locale>1033</VerInfo_Locale>
@@ -103,9 +104,10 @@
         <ILINK_TranslatedLibraryPath>$(BDSLIB)\$(PLATFORM)\debug\$(LANGDIR);$(ILINK_TranslatedLibraryPath)</ILINK_TranslatedLibraryPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
         <VerInfo_Debug>true</VerInfo_Debug>
-        <VerInfo_Keys>CompanyName=П3тр0виЧъ;FileDescription=Сбор данных о загрузке доменных печей;FileVersion=2.0.0.0;InternalName=DP_Rep;LegalCopyright=© П3тр0виЧъ;LegalTrademarks=П3тр0виЧъ™;OriginalFilename=DP_Rep.exe;ProductName=Отчёты с доменных печей;ProductVersion=2.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=П3тр0виЧъ;FileDescription=Сбор данных о загрузке доменных печей;FileVersion=2.1.0.0;InternalName=DP_Rep;LegalCopyright=© П3тр0виЧъ;LegalTrademarks=П3тр0виЧъ™;OriginalFilename=DP_Rep.exe;ProductName=Отчёты с доменных печей;ProductVersion=2.0.0.0;Comments=</VerInfo_Keys>
         <UsePackages>false</UsePackages>
         <LinkPackageStatics>rtl.lib;vcl.lib;dbrtl.lib;adortl.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;vclimg.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;IcsCommonCBXE3Run.lib</LinkPackageStatics>
         <DynamicRTL>false</DynamicRTL>
@@ -117,25 +119,24 @@
         <TASM_Debugging>None</TASM_Debugging>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
+        <VerInfo_MinorVer>1</VerInfo_MinorVer>
         <LinkPackageStatics>rtl.lib;vcl.lib;dbrtl.lib;adortl.lib;IndySystem.lib;IndyProtocols.lib;IndyCore.lib;vclimg.lib;xmlrtl.lib;vclactnband.lib;vclx.lib;IcsCommonCBXE3Run.lib</LinkPackageStatics>
         <DynamicRTL>false</DynamicRTL>
         <VerInfo_MajorVer>2</VerInfo_MajorVer>
         <UsePackages>false</UsePackages>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=П3тр0виЧъ;FileDescription=Сбор данных о загрузке доменных печей;FileVersion=2.0.0.0;InternalName=DP_Rep;LegalCopyright=© П3тр0виЧъ;LegalTrademarks=П3тр0виЧъ™;OriginalFilename=DP_Rep.exe;ProductName=Отчёты с доменных печей;ProductVersion=2.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=П3тр0виЧъ;FileDescription=Сбор данных о загрузке доменных печей;FileVersion=2.1.0.0;InternalName=DP_Rep;LegalCopyright=© П3тр0виЧъ;LegalTrademarks=П3тр0виЧъ™;OriginalFilename=DP_Rep.exe;ProductName=Отчёты с доменных печей;ProductVersion=2.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <ItemGroup>
         <CppCompile Include="..\!UtilsAndComps\AboutFrm.cpp">
             <DependentOn>..\!UtilsAndComps\AboutFrm.h</DependentOn>
             <BuildOrder>6</BuildOrder>
-            <OptionOverrides>true</OptionOverrides>
         </CppCompile>
         <None Include="..\!UtilsAndComps\AboutFrmStr.h">
             <BuildOrder>13</BuildOrder>
         </None>
         <ResourceCompile Include="..\!UtilsAndComps\AboutFrmStr.rc">
-            <ModuleName>AboutFrmStr.rc</ModuleName>
             <Form>AboutFrmStr.res</Form>
             <BuildOrder>15</BuildOrder>
         </ResourceCompile>
@@ -155,7 +156,6 @@
             <BuildOrder>14</BuildOrder>
         </None>
         <ResourceCompile Include="..\!UtilsAndComps\UtilsFilesStr.rc">
-            <ModuleName>UtilsFilesStr.rc</ModuleName>
             <Form>UtilsFilesStr.res</Form>
             <BuildOrder>16</BuildOrder>
         </ResourceCompile>
@@ -657,13 +657,13 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Android" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="Win32" Name="$(PROJECTNAME)"/>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="OSX32" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="Win64" Name="$(PROJECTNAME)"/>
-                <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
+                <ProjectRoot Platform="iOSDevice32" Name="$(PROJECTNAME).app"/>
             </Deployment>
             <Platforms>
                 <Platform value="Win32">True</Platform>

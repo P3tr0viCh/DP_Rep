@@ -10,8 +10,10 @@ IDS_ERROR_DB_NOT_EXISTS,
         "Нет доступа к базе данных ""%s"""
 IDS_UPDATE_WAIT,
         "Получение данных..."
-IDS_REPORT_CAPTION,
-        "Загрузка доменных печей %s"
+IDS_REPORT_CAPTION_0,
+        "Загрузка доменных печей за сутки %s"
+IDS_REPORT_CAPTION_1,
+        "Загрузка доменных печей с %s по %s"
 IDS_ERROR_DB_OPEN,
         "Произошла ошибка во время открытия базы данных: ""%s"""
 IDS_ERROR_DB_LOAD,
@@ -28,4 +30,10 @@ IDS_PING_ERROR
         "%s  не отвечает.\nТелефон: %s"
 IDS_PING_RESULT
         "Повторить проверку доступности?"
+IDS_DATETIME_LABEL
+        "%s —\n%s"
+IDS_SQL_CONNECTION
+        "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=%s;Persist Security Info=False;User ID=Admin;Jet OLEDB:Database Password=%s;"
+IDS_SQL_QUERY
+        "SELECT Products.Product, Sum(Measures.Weigh) AS [Sum-Weigh], Count(Measures.ID) AS [Count-ID] FROM Measures INNER JOIN Products ON Measures.ProductID = Products.ProductID WHERE ((Measures.DT>=#%s# and Measures.DT<=#%s#)) GROUP BY Products.Product"
 END

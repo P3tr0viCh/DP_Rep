@@ -5,9 +5,11 @@
 //---------------------------------------------------------------------------
 #endif
 
-bool LoadData(String AFolderName, TDate ADate, String &ARecords);
+bool LoadData(String AFolderName,
+	TDateTime ADateFrom, TDateTime ADateTo, String &ARecords);
 
 String StrToUrl(String S, bool UseUTF8);
 String DToS(TDate ADate);
-String DateToMDBStr(TDate ADate);
+String DTToS(TDateTime ADateTime);
+String DateTimeToMDBStr(TDateTime ADateTime);
 String FmtFloat(Double Value);

@@ -18,7 +18,8 @@
 
 #define sDot "• "
 
-bool LoadData(String AFolderName, TDate ADate, String &ARecords) {
+bool LoadData(String AFolderName,
+	TDateTime ADateFrom, TDateTime ADateTo, String &ARecords) {
 	String DB, S = "";
 
 	bool Result;
@@ -33,8 +34,7 @@ bool LoadData(String AFolderName, TDate ADate, String &ARecords) {
 	Result = FileExists(DB);
 	if (Result) {
 		Main->Connection->ConnectionString =
-			Format("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=%s;Persist Security Info=False;User ID=Admin;Jet OLEDB:Database Password="
-			"%s" ";", ARRAYOFCONST((DB, PASSWORD)));
+			Format(IDS_SQL_CONNECTION, ARRAYOFCONST((DB, PASSWORD)));
 
 		// S = Main->Connection->ConnectionString; Result = false;
 
@@ -50,11 +50,11 @@ bool LoadData(String AFolderName, TDate ADate, String &ARecords) {
 			Main->Query->SQL->Clear();
 
 			Main->Query->SQL->Add
-				(Format(
-				"SELECT Products.Product, Sum(Measures.Weigh) AS [Sum-Weigh], Count(Measures.ID) AS [Count-ID] FROM Measures INNER JOIN Products ON Measures.ProductID = Products.ProductID WHERE ((Measures.DT>=#%0:s 0:0:0# and Measures.DT<=#%0:s 23:59:59#)) GROUP BY Products.Product",
-				DateToMDBStr(ADate)));
+				(Format(IDS_SQL_QUERY,
+					ARRAYOFCONST((DateTimeToMDBStr(ADateFrom),
+						DateTimeToMDBStr(ADateTo)))));
 
-			// S = Main->Query->SQL[0][0]; Result = false;
+//			S = Main->Query->SQL[0][0]; Result = false;
 
 			try {
 				Main->Query->Open();
@@ -196,8 +196,12 @@ String DToS(TDate ADate) {
 	return FormatDateTime("yyyy.mm.dd", ADate);
 }
 
-String DateToMDBStr(TDate ADate) {
-	return FormatDateTime("M'/'d'/'yyyy", ADate);
+String DTToS(TDateTime ADateTime) {
+	return FormatDateTime("yyyy/mm/dd hh:nn", ADateTime);
+}
+
+String DateTimeToMDBStr(TDateTime ADateTime) {
+	return FormatDateTime("M'/'d'/'yyyy' 'h':'n':'s", ADateTime);
 }
 
 String FmtFloat(Double Value) {

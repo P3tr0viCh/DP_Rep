@@ -44,9 +44,13 @@ void __fastcall TMain::FormCreate(TObject *Sender) {
 
 	TFileIni* FileIni = CreateINIFile();
 
+	ReportType = FileIni->ReadInteger("Report", "Type", 0);
+
 	FileIni->ReadFormBounds(this);
 
 	delete FileIni;
+
+	UpdateDateTime();
 }
 // ---------------------------------------------------------------------------
 
@@ -94,18 +98,47 @@ void __fastcall TMain::FormShow(TObject *Sender) {
 
 void __fastcall TMain::btnDatePrevClick(TObject * Sender) {
 	DateTimePicker->Date = DateTimePicker->Date + ((TSpeedButton*) Sender)->Tag;
+
 	Memo->Clear();
+
+	UpdateDateTime();
 }
 // ---------------------------------------------------------------------------
 
 void __fastcall TMain::DateTimePickerChange(TObject * Sender) {
 	Memo->Clear();
+	UpdateDateTime();
 }
 // ---------------------------------------------------------------------------
 
+void TMain::UpdateDateTime() {
+	TDateTime ADate = DateTimePicker->Date;
+
+	Word Year, Month, Day;
+
+	if (ReportType == 1) {
+		DecodeDate(ADate - 1, Year, Month, Day);
+
+		DateTimeFrom = TDateTime(Year, Month, Day, 20, 0, 0, 0);
+
+		DecodeDate(ADate, Year, Month, Day);
+
+		DateTimeTo = TDateTime(Year, Month, Day, 19, 59, 59, 999);
+	} else {
+		DecodeDate(ADate, Year, Month, Day);
+
+		DateTimeFrom = TDateTime(Year, Month, Day, 0, 0, 0, 0);
+
+		DateTimeTo = TDateTime(Year, Month, Day, 23, 59, 59, 999);
+	}
+
+	lblDateTime->Caption = Format(IDS_DATETIME_LABEL,
+		ARRAYOFCONST((DTToS(DateTimeFrom), DTToS(DateTimeTo))));
+}
+
 void __fastcall TMain::tbtnAboutClick(TObject * Sender) {
 	ShowAbout(18, MAXBYTE, 3, NULL, NULL, NULL, NULL, NULL,
-		"© Ï3òð0âè×ú (Ê.Ï. Äóðàåâ, Óðàëüñêàÿ Ñòàëü, ÖÂÒÑ, 2004-2015)|@n.gololobov@uralsteel.com");
+		"© Ï3òð0âè×ú (Ê.Ï. Äóðàåâ, Óðàëüñêàÿ Ñòàëü, ÖÂÒÑ, 2004-2016)|@n.gololobov@uralsteel.com");
 }
 // ---------------------------------------------------------------------------
 
@@ -228,46 +261,56 @@ bool TMain::ReportUpdate() {
 
 	ShowWaitCursor();
 
-	tbtnUpdate->Enabled = false;
-	tbtnMail->Enabled   = false;
-	tbtnSave->Enabled   = false;
-
-	PanelDate->Enabled = false;
-
-	Memo->Lines->Clear();
-
-	Memo->Lines->Add(LoadStr(IDS_UPDATE_WAIT) + sLineBreak);
-
-	ProcMess();
-
-	S = Format(IDS_REPORT_CAPTION, DToS(DateTimePicker->Date)) + sLineBreak;
-
-	DBResultOK    = LoadStr(IDS_UPDATE_OK);
-	DBResultError = LoadStr(IDS_UPDATE_ERROR);
-
 	TFileIni* FileIni = CreateINIFile();
 
-	for (int i = 1; i <= FileIni->ReadInteger("DB", "Count", 0); i++) {
+	try {
+		tbtnUpdate->Enabled = false;
+		tbtnMail->Enabled   = false;
+		tbtnSave->Enabled   = false;
+
+		PanelDate->Enabled = false;
+
+		Memo->Lines->Clear();
+
+		Memo->Lines->Add(LoadStr(IDS_UPDATE_WAIT) + sLineBreak);
+
 		ProcMess();
 
-		Name = FileIni->ReadString("DB", "Name" + IntToStr(i), "");
+		if (ReportType == 1)
+			S = Format(IDS_REPORT_CAPTION_1,
+				ARRAYOFCONST((DTToS(DateTimeFrom), DTToS(DateTimeTo))));
+		else
+			S = Format(IDS_REPORT_CAPTION_0, DToS(DateTimeFrom));
 
-		S = S + sLineBreak + Name + sLineBreak;
+		S += sLineBreak;
 
-		line = Memo->Lines->Add(Name + "... ");
+		DBResultOK    = LoadStr(IDS_UPDATE_OK);
+		DBResultError = LoadStr(IDS_UPDATE_ERROR);
 
-		if (LoadData(FileIni->ReadString("DB", "Path" + IntToStr(i), ""),
-			DateTimePicker->Date, S))
-			DBResult = DBResultOK;
-		else {
-			Result   = false;
-			DBResult = DBResultError;
+		for (int i = 1; i <= FileIni->ReadInteger("DB", "Count", 0); i++) {
+			ProcMess();
+
+			Name = FileIni->ReadString("DB", "Name" + IntToStr(i), "");
+
+			S = S + sLineBreak + Name + sLineBreak;
+
+			line = Memo->Lines->Add(Name + "... ");
+
+			if (LoadData(FileIni->ReadString("DB", "Path" + IntToStr(i), ""),
+					DateTimeFrom, DateTimeTo, S))
+				DBResult = DBResultOK;
+			else {
+				Result   = false;
+				DBResult = DBResultError;
+			}
+
+			Memo->Lines->Strings[line] = Memo->Lines->Strings[line] + DBResult +
+				sLineBreak;
+
+			// Delay(2000);
 		}
-
-		Memo->Lines->Strings[line] = Memo->Lines->Strings[line] + DBResult +
-			sLineBreak;
-
-		// Delay(2000);
+	} catch (Exception *E) {
+		S = E->Message;
 	}
 
 	FileIni->Free();
@@ -300,8 +343,8 @@ void TMain::ReportMail() {
 
 		String S = Format(IDS_MAIL_TO,
 			ARRAYOFCONST((FileIni->ReadString("E-Mail", "Address", ""),
-			StrToUrl(FileIni->ReadString("E-Mail", "Subject", ""), UseUTF8),
-			StrToUrl(Memo->Lines->Text, UseUTF8))));
+				StrToUrl(FileIni->ReadString("E-Mail", "Subject", ""), UseUTF8),
+				StrToUrl(Memo->Lines->Text, UseUTF8))));
 
 		delete FileIni;
 

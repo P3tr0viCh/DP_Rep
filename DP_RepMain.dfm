@@ -218,6 +218,22 @@ object Main: TMain
         FFFFFFFFEFEFEFFF0000}
       OnClick = btnDatePrevClick
     end
+    object lblDateTime: TLabel
+      Left = 284
+      Top = 0
+      Width = 236
+      Height = 46
+      AutoSize = False
+      Caption = #1089' 29.03.1981 00:00 '#1087#1086' 29.03.1981 23:59'
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clGrayText
+      Font.Height = -16
+      Font.Name = 'Arial'
+      Font.Style = []
+      ParentFont = False
+      Layout = tlCenter
+      WordWrap = True
+    end
     object DateTimePicker: TDateTimePicker
       Left = 92
       Top = 8
@@ -247,7 +263,7 @@ object Main: TMain
     Left = 37
     Top = 146
     Bitmap = {
-      494C010105000900480030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101050009004C0030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C00000006000000001002000000000000020
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
