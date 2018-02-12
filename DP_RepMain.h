@@ -1,8 +1,8 @@
-//---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 
 #ifndef DP_RepMainH
 #define DP_RepMainH
-//---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 #include <System.Classes.hpp>
 #include <Vcl.Controls.hpp>
 #include <Vcl.StdCtrls.hpp>
@@ -17,10 +17,12 @@
 #include <Vcl.Menus.hpp>
 #include <Vcl.ToolWin.hpp>
 
-//---------------------------------------------------------------------------
-class TMain : public TForm
-{
-__published:	// IDE-managed Components
+#include "DP_RepSettings.h"
+
+// ---------------------------------------------------------------------------
+class TMain : public TForm {
+__published: // IDE-managed Components
+
 	TStatusBar *StatusBar;
 	TToolBar *ToolBar;
 	TToolButton *tbtnUpdate;
@@ -41,6 +43,7 @@ __published:	// IDE-managed Components
 	TMenuItem *miCopy;
 	TMemo *Memo;
 	TLabel *lblDateTime;
+
 	void __fastcall tbtnCloseClick(TObject *Sender);
 	void __fastcall FormCreate(TObject *Sender);
 	void __fastcall btnDatePrevClick(TObject *Sender);
@@ -53,25 +56,27 @@ __published:	// IDE-managed Components
 	void __fastcall tbtnUpdateClick(TObject *Sender);
 	void __fastcall tbtnMailClick(TObject *Sender);
 	void __fastcall FormShow(TObject *Sender);
-private:	// User declarations
-	int ReportType;
-	// 0 -- one day from 00:00 to 23:59
-	// 1 -- two days from 20:00 to 19:59
+
+private: // User declarations
+
+	TSettings* Settings;
 
 	TDateTime DateTimeFrom;
 	TDateTime DateTimeTo;
 
 	bool CheckForSave();
-	bool Ping(String HostName);
+	bool Ping(String HostAddr);
 	int CheckPing();
 	void ReportSave();
 	bool ReportUpdate();
 	void ReportMail();
 	void UpdateDateTime();
-public:		// User declarations
+
+public: // User declarations
 	__fastcall TMain(TComponent* Owner);
 };
-//---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
 extern PACKAGE TMain *Main;
-//---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 #endif

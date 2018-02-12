@@ -1,18 +1,16 @@
 object Main: TMain
   Left = 407
   Top = 186
-  BorderIcons = [biSystemMenu, biMinimize]
   Caption = #1054#1090#1095#1105#1090#1099' '#1089' '#1076#1086#1084#1077#1085#1085#1099#1093' '#1087#1077#1095#1077#1081
   ClientHeight = 413
   ClientWidth = 522
   Color = clBtnFace
-  Constraints.MaxWidth = 538
   Constraints.MinHeight = 440
   Constraints.MinWidth = 538
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -19
-  Font.Name = 'Arial'
+  Font.Name = 'Segoe UI'
   Font.Style = []
   KeyPreview = True
   OldCreateOrder = False
@@ -22,23 +20,30 @@ object Main: TMain
   OnKeyDown = FormKeyDown
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 22
+  TextHeight = 25
   object StatusBar: TStatusBar
     Left = 0
-    Top = 394
+    Top = 391
     Width = 522
-    Height = 19
+    Height = 22
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBtnText
+    Font.Height = -12
+    Font.Name = 'Segoe UI'
+    Font.Style = []
     Panels = <>
     SimplePanel = True
-    SimpleText = #169' '#1055'3'#1090#1088'0'#1074#1080#1063#1098
+    SimpleText = #169' '#1050#1086#1085#1089#1090#1072#1085#1090#1080#1085' '#1044#1091#1088#1072#1077#1074' ('#1059#1088#1072#1083#1100#1089#1082#1072#1103' '#1057#1090#1072#1083#1100', '#1062#1042#1058#1057')'
+    UseSystemFont = False
+    ExplicitTop = 389
   end
   object ToolBar: TToolBar
     Left = 0
     Top = 0
     Width = 522
-    Height = 81
+    Height = 84
     AutoSize = True
-    ButtonHeight = 77
+    ButtonHeight = 80
     ButtonWidth = 123
     EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
     Images = ImageList
@@ -63,7 +68,7 @@ object Main: TMain
       OnClick = tbtnMailClick
     end
     object tbtnSave: TToolButton
-      Left = 200
+      Left = 201
       Top = 0
       AutoSize = True
       Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100
@@ -106,7 +111,7 @@ object Main: TMain
   end
   object PanelDate: TPanel
     Left = 0
-    Top = 81
+    Top = 84
     Width = 522
     Height = 46
     Margins.Left = 0
@@ -118,6 +123,10 @@ object Main: TMain
     Caption = #1044#1072#1090#1072':'
     TabOrder = 2
     StyleElements = [seFont, seClient]
+    ExplicitTop = 81
+    DesignSize = (
+      522
+      46)
     object btnDateNext: TSpeedButton
       Tag = 1
       Left = 248
@@ -223,14 +232,18 @@ object Main: TMain
       Top = 0
       Width = 236
       Height = 46
+      Anchors = [akLeft, akTop, akRight, akBottom]
       AutoSize = False
       Caption = #1089' 29.03.1981 00:00 '#1087#1086' 29.03.1981 23:59'
+      Color = clBtnFace
       Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGrayText
+      Font.Color = clWindowText
       Font.Height = -16
       Font.Name = 'Arial'
       Font.Style = []
+      ParentColor = False
       ParentFont = False
+      Transparent = True
       Layout = tlCenter
       WordWrap = True
     end
@@ -238,24 +251,27 @@ object Main: TMain
       Left = 92
       Top = 8
       Width = 150
-      Height = 30
-      Date = 39700.550360601860000000
-      Time = 39700.550360601860000000
+      Height = 33
+      Date = 29674.550360601860000000
+      Format = 'yyyy.MM.dd'
+      Time = 29674.550360601860000000
       TabOrder = 0
       OnChange = DateTimePickerChange
     end
   end
   object Memo: TMemo
     Left = 0
-    Top = 127
+    Top = 130
     Width = 522
-    Height = 267
+    Height = 261
     Align = alClient
     PopupMenu = pmMemo
     ReadOnly = True
     ScrollBars = ssBoth
     TabOrder = 0
     WordWrap = False
+    ExplicitTop = 127
+    ExplicitHeight = 267
   end
   object ImageList: TImageList
     Height = 48
@@ -263,7 +279,7 @@ object Main: TMain
     Left = 37
     Top = 146
     Bitmap = {
-      494C0101050009004C0030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000900500030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C00000006000000001002000000000000020
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

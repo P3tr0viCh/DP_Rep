@@ -42,24 +42,31 @@ void __fastcall TMain::tbtnCloseClick(TObject *Sender) {
 void __fastcall TMain::FormCreate(TObject *Sender) {
 	DateTimePicker->Date = Date() - 1;
 
-	TFileIni* FileIni = CreateINIFile();
+	TFileIni* FileIni = TFileIni::GetNewInstance();
+	try {
+		FileIni->ReadFormBounds(this);
+	}
+	__finally {
+		delete FileIni;
+	}
 
-	ReportType = FileIni->ReadInteger("Report", "Type", 0);
-
-	FileIni->ReadFormBounds(this);
-
-	delete FileIni;
+	Settings = new TSettings();
+	Settings->Load();
 
 	UpdateDateTime();
 }
 // ---------------------------------------------------------------------------
 
 void __fastcall TMain::FormDestroy(TObject *Sender) {
-	TFileIni* FileIni = CreateINIFile();
+	Settings->Free();
 
-	FileIni->WriteFormBounds(this);
-
-	delete FileIni;
+	TFileIni* FileIni = TFileIni::GetNewInstance();
+	try {
+		FileIni->WriteFormBounds(this);
+	}
+	__finally {
+		delete FileIni;
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -68,30 +75,34 @@ void __fastcall TMain::FormShow(TObject *Sender) {
 
 	if (!IsShift()) {
 		NeedUpdate = true;
-		OKUpdate   = true;
+		OKUpdate = true;
 
 		if (FindCmdLineSwitch("UPDATE")) {
-			OKUpdate   = ReportUpdate();
+			OKUpdate = ReportUpdate();
 			NeedUpdate = false;
 		}
 
 		if (FindCmdLineSwitch("MAIL")) {
 			if (NeedUpdate) {
-				OKUpdate   = ReportUpdate();
+				OKUpdate = ReportUpdate();
 				NeedUpdate = false;
 			}
-			if (OKUpdate)
+			if (OKUpdate) {
 				ReportMail();
+			}
 		}
 
 		if (FindCmdLineSwitch("SAVE")) {
-			if (NeedUpdate)
+			if (NeedUpdate) {
 				OKUpdate = ReportUpdate();
-			if (OKUpdate)
+			}
+			if (OKUpdate) {
 				ReportSave();
+			}
 		}
-		if (FindCmdLineSwitch("CLOSE") & OKUpdate)
+		if (FindCmdLineSwitch("CLOSE") && OKUpdate) {
 			Close();
+		}
 	}
 }
 // ---------------------------------------------------------------------------
@@ -116,7 +127,7 @@ void TMain::UpdateDateTime() {
 
 	Word Year, Month, Day;
 
-	if (ReportType == 1) {
+	if (Settings->ReportType == 1) {
 		DecodeDate(ADate - 1, Year, Month, Day);
 
 		DateTimeFrom = TDateTime(Year, Month, Day, 20, 0, 0, 0);
@@ -124,7 +135,8 @@ void TMain::UpdateDateTime() {
 		DecodeDate(ADate, Year, Month, Day);
 
 		DateTimeTo = TDateTime(Year, Month, Day, 19, 59, 59, 999);
-	} else {
+	}
+	else {
 		DecodeDate(ADate, Year, Month, Day);
 
 		DateTimeFrom = TDateTime(Year, Month, Day, 0, 0, 0, 0);
@@ -137,17 +149,18 @@ void TMain::UpdateDateTime() {
 }
 
 void __fastcall TMain::tbtnAboutClick(TObject * Sender) {
-	ShowAbout(18, MAXBYTE, 3, NULL, NULL, NULL, NULL, NULL,
-		"© Ï3òð0âè×ú (Ê.Ï. Äóðàåâ, Óðàëüñêàÿ Ñòàëü, ÖÂÒÑ, 2004-2016)|@n.gololobov@uralsteel.com");
+	ShowAbout(14, MAXBYTE, MAXBYTE, MAXBYTE, NULL, NULL, NULL, NULL, NULL,
+		LoadStr(IDS_COPYRIGHT));
 }
 // ---------------------------------------------------------------------------
 
 void __fastcall TMain::FormKeyDown(TObject * Sender, WORD & Key,
 	TShiftState Shift) {
-	if (!Memo->Enabled)
+	if (!Memo->Enabled) {
 		return;
+	}
 
-	if (Shift.Empty())
+	if (Shift.Empty()) {
 		switch (Key) {
 		case VK_F1:
 			tbtnAbout->Click();
@@ -162,51 +175,55 @@ void __fastcall TMain::FormKeyDown(TObject * Sender, WORD & Key,
 			tbtnMail->Click();
 			break;
 		}
+	}
 }
 // ---------------------------------------------------------------------------
 
 bool TMain::CheckForSave() {
 	bool Result = Memo->Lines->Text.IsEmpty();
-	if (Result)
+	if (Result) {
 		MsgBoxErr(LoadStr(IDS_ERROR_MEMO_CLEAR));
+	}
+
 	return Result;
 }
 
 void TMain::ReportSave() {
-	if (CheckForSave())
+	if (CheckForSave()) {
 		return;
+	}
+
 	Memo->Lines->SaveToFile(FileInAppDir(Format("%s.txt",
 		DToS(DateTimePicker->Date))));
 }
 
-bool TMain::Ping(String HostName) {
+bool TMain::Ping(String HostAddr) {
 	bool Result;
 
 	HANDLE hIcmpFile;
 	unsigned long ipaddr;
 	DWORD dwRetVal;
-	char SendData[32]    = "Data Buffer";
+	char SendData[32] = "Data Buffer";
 	LPVOID ReplyBuffer;
 	DWORD ReplySize;
 
-	ipaddr = inet_addr(AnsiString(HostName).c_str());
+	ipaddr = inet_addr(AnsiString(HostAddr).c_str());
 	Result = ipaddr != INADDR_NONE;
 	if (Result) {
-
 		hIcmpFile = IcmpCreateFile();
-		Result    = hIcmpFile != INVALID_HANDLE_VALUE;
-		if (Result) {
+		Result = hIcmpFile != INVALID_HANDLE_VALUE;
 
-			ReplySize   = sizeof(ICMP_ECHO_REPLY)+sizeof(SendData);
+		if (Result) {
+			ReplySize = sizeof(ICMP_ECHO_REPLY)+sizeof(SendData);
 			ReplyBuffer = (VOID*) malloc(ReplySize);
 
 			Result = ReplyBuffer != NULL;
 			if (Result) {
-
 				dwRetVal = IcmpSendEcho(hIcmpFile, ipaddr, SendData,
 					sizeof(SendData), NULL, ReplyBuffer, ReplySize, 1000);
 
 				Result = dwRetVal != 0;
+
 				if (Result) {
 					PICMP_ECHO_REPLY pEchoReply =
 						(PICMP_ECHO_REPLY) ReplyBuffer;
@@ -228,45 +245,45 @@ int TMain::CheckPing() {
 
 	ShowWaitCursor();
 
-	TFileIni* FileIni = CreateINIFile();
+	TDB* DB;
+	for (int i = 0; i < Settings->DBs->Count; i++) {
+		DB = (TDB*)Settings->DBs->List[i];
 
-	for (int i = 1; i <= FileIni->ReadInteger("DB", "Count", 0); i++) {
 		ProcMess();
 
-		Host = FileIni->ReadString("DB", "Ping" + IntToStr(i), "");
+		Host = DB->Ping;
 
-		if (Host != "")
-			if (!Ping(Host))
+		if (Host != "") {
+			if (!Ping(Host)) {
 				S = ConcatStrings(S, Format(IDS_PING_ERROR,
-				ARRAYOFCONST((FileIni->ReadString("DB", "Name" + IntToStr(i),
-				""), FileIni->ReadString("DB", "Phone" + IntToStr(i), "")))),
-				(String) sLineBreak + (String) sLineBreak);
-	}
+					ARRAYOFCONST((DB->Name, DB->Phone))),
+					(String) sLineBreak + (String) sLineBreak);
+			}
+		}
 
-	FileIni->Free();
+	}
 
 	RestoreCursor();
 
-	if (S != "")
+	if (S != "") {
 		Result = MsgBox(S + sLineBreak + sLineBreak + LoadStr(IDS_PING_RESULT),
-		MB_YESNOCANCEL | MB_ICONQUESTION);
+			MB_YESNOCANCEL | MB_ICONQUESTION);
+	}
 
 	return Result;
 }
 
 bool TMain::ReportUpdate() {
 	int i, line;
-	String S    = "", Name = "", DBResult, DBResultOK, DBResultError;
+	String S = "", Name = "", DBResult, DBResultOK, DBResultError;
 	bool Result = true;
 
 	ShowWaitCursor();
 
-	TFileIni* FileIni = CreateINIFile();
-
 	try {
 		tbtnUpdate->Enabled = false;
-		tbtnMail->Enabled   = false;
-		tbtnSave->Enabled   = false;
+		tbtnMail->Enabled = false;
+		tbtnSave->Enabled = false;
 
 		PanelDate->Enabled = false;
 
@@ -276,31 +293,36 @@ bool TMain::ReportUpdate() {
 
 		ProcMess();
 
-		if (ReportType == 1)
+		if (Settings->ReportType == 1) {
 			S = Format(IDS_REPORT_CAPTION_1,
 				ARRAYOFCONST((DTToS(DateTimeFrom), DTToS(DateTimeTo))));
-		else
+		}
+		else {
 			S = Format(IDS_REPORT_CAPTION_0, DToS(DateTimeFrom));
+		}
 
 		S += sLineBreak;
 
-		DBResultOK    = LoadStr(IDS_UPDATE_OK);
+		DBResultOK = LoadStr(IDS_UPDATE_OK);
 		DBResultError = LoadStr(IDS_UPDATE_ERROR);
 
-		for (int i = 1; i <= FileIni->ReadInteger("DB", "Count", 0); i++) {
+		TDB* DB;
+		for (int i = 0; i < Settings->DBs->Count; i++) {
+			DB = (TDB*)Settings->DBs->List[i];
+
 			ProcMess();
 
-			Name = FileIni->ReadString("DB", "Name" + IntToStr(i), "");
+			Name = DB->Name;
 
 			S = S + sLineBreak + Name + sLineBreak;
 
 			line = Memo->Lines->Add(Name + "... ");
 
-			if (LoadData(FileIni->ReadString("DB", "Path" + IntToStr(i), ""),
-					DateTimeFrom, DateTimeTo, S))
+			if (LoadData(DB->Path, DateTimeFrom, DateTimeTo, S)) {
 				DBResult = DBResultOK;
+			}
 			else {
-				Result   = false;
+				Result = false;
 				DBResult = DBResultError;
 			}
 
@@ -309,20 +331,19 @@ bool TMain::ReportUpdate() {
 
 			// Delay(2000);
 		}
-	} catch (Exception *E) {
+	}
+	catch (Exception *E) {
 		S = E->Message;
 	}
-
-	FileIni->Free();
 
 	Delay(200);
 
 	Memo->Text = S;
 
 	tbtnUpdate->Enabled = true;
-	tbtnMail->Enabled   = true;
-	tbtnSave->Enabled   = true;
-	PanelDate->Enabled  = true;
+	tbtnMail->Enabled = true;
+	tbtnSave->Enabled = true;
+	PanelDate->Enabled = true;
 
 	RestoreCursor();
 
@@ -330,35 +351,34 @@ bool TMain::ReportUpdate() {
 }
 
 void TMain::ReportMail() {
-	if (CheckForSave())
+	if (CheckForSave()) {
 		return;
+	}
 
 	ShowWaitCursor();
 
 	try {
-		TFileIni* FileIni = CreateINIFile();
-
-		bool UseUTF8      = FileIni->ReadBool("E-Mail", "UseUTF8", false);
-		String MailClient = FileIni->ReadString("E-Mail", "Client", "");
-
-		String S = Format(IDS_MAIL_TO,
-			ARRAYOFCONST((FileIni->ReadString("E-Mail", "Address", ""),
-				StrToUrl(FileIni->ReadString("E-Mail", "Subject", ""), UseUTF8),
-				StrToUrl(Memo->Lines->Text, UseUTF8))));
-
-		delete FileIni;
-
-		// MsgBox(S); CopyToClipBoard(S); RestoreCursor(); return;
-
-		if (MailClient != "") {
-			if (!EXEIsRunning(MailClient, true)) {
-				ShellExec(MailClient);
+		if (!IsEmpty(Settings->MailClient)) {
+			if (!EXEIsRunning(Settings->MailClient, true)) {
+				ShellExec(Settings->MailClient);
 				Delay(1000);
 			}
 		}
 
-		ShellExec(S);
+		String S = "";
 
+		TMail* Mail;
+
+		for (int i = 0; i < Settings->Mails->Count; i++) {
+			Mail = (TMail*)Settings->Mails->List[i];
+
+			S = Format(IDS_MAIL_TO,
+				ARRAYOFCONST((Mail->Address, StrToUrl(Settings->MailSubject,
+				Settings->MailUseUTF8), StrToUrl(Memo->Lines->Text,
+				Settings->MailUseUTF8))));
+
+			ShellExec(S);
+		}
 	}
 	catch (Exception *E) {
 		MsgBoxErr(E->Message);
@@ -380,7 +400,9 @@ void __fastcall TMain::tbtnUpdateClick(TObject * Sender) {
 	}
 	while (Result == ID_YES);
 
-	if (Result != ID_CANCEL) ReportUpdate();
+	if (Result != ID_CANCEL) {
+		ReportUpdate();
+	}
 }
 // ---------------------------------------------------------------------------
 

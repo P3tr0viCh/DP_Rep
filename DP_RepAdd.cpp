@@ -16,16 +16,15 @@
 // ---------------------------------------------------------------------------
 #pragma package(smart_init)
 
-#define sDot "• "
-
-bool LoadData(String AFolderName,
-	TDateTime ADateFrom, TDateTime ADateTo, String &ARecords) {
+bool LoadData(String AFolderName, TDateTime ADateFrom, TDateTime ADateTo,
+	String &ARecords) {
 	String DB, S = "";
 
 	bool Result;
 
-	if (AFolderName == "")
+	if (IsEmpty(AFolderName)) {
 		return false;
+	}
 
 	ProcMess();
 
@@ -42,25 +41,24 @@ bool LoadData(String AFolderName,
 			Main->Connection->Open();
 		}
 		catch (Exception *E) {
-			S      = Format(IDS_ERROR_DB_OPEN, E->Message);
+			S = Format(IDS_ERROR_DB_OPEN, E->Message);
 			Result = false;
 		}
 
 		if (Result) {
 			Main->Query->SQL->Clear();
 
-			Main->Query->SQL->Add
-				(Format(IDS_SQL_QUERY,
-					ARRAYOFCONST((DateTimeToMDBStr(ADateFrom),
-						DateTimeToMDBStr(ADateTo)))));
+			Main->Query->SQL->Add(Format(IDS_SQL_QUERY,
+				ARRAYOFCONST((DateTimeToMDBStr(ADateFrom),
+				DateTimeToMDBStr(ADateTo)))));
 
-//			S = Main->Query->SQL[0][0]; Result = false;
+			// S = Main->Query->SQL[0][0]; Result = false;
 
 			try {
 				Main->Query->Open();
 			}
 			catch (Exception *E) {
-				S      = Format(IDS_ERROR_DB_LOAD, E->Message);
+				S = Format(IDS_ERROR_DB_LOAD, E->Message);
 				Result = false;
 			}
 
@@ -73,18 +71,22 @@ bool LoadData(String AFolderName,
 					Main->Query->Next();
 				}
 
-				if (S == "")
+				if (IsEmpty(S)) {
 					S = sDot + LoadStr(IDS_DB_NO_RECORDS) + sLineBreak;
+				}
 			}
 		}
 	}
-	else
+	else {
 		S = Format(IDS_ERROR_DB_NOT_EXISTS, DB);
+	}
 
-	if (Result)
+	if (Result) {
 		ARecords = ARecords + S;
-	else
+	}
+	else {
 		ARecords = ARecords + sDot + S + sLineBreak;
+	}
 
 	Main->Query->Close();
 	Main->Connection->Close();
@@ -206,4 +208,28 @@ String DateTimeToMDBStr(TDateTime ADateTime) {
 
 String FmtFloat(Double Value) {
 	return FormatFloat("0.00", Value);
+}
+
+void Split(TStringList* AOut, String S, String Separator) {
+	if (IsEmpty(S)) {
+		return;
+	}
+
+	if (Trim(S) == "*") {
+		return;
+	}
+
+	S += ";";
+
+	String S2;
+	do {
+		SplitStr(S, Separator, 0, S2, S);
+
+		S2 = Trim(S2);
+
+		if (!IsEmpty(S2)) {
+			AOut->Add(S2);
+		}
+	}
+	while (!IsEmpty(S));
 }

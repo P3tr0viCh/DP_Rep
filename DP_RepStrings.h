@@ -22,3 +22,5 @@
 
 #define IDS_SQL_CONNECTION      1700
 #define IDS_SQL_QUERY	        1701
+
+#define IDS_COPYRIGHT			1800
