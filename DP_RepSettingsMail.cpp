@@ -11,6 +11,7 @@ __fastcall TMail::TMail() {
 	FAddress = "";
 
 	FFilter = new TStringList();
+	FFilter->CaseSensitive = false;
 }
 
 // ---------------------------------------------------------------------------

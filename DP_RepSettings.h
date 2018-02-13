@@ -6,9 +6,6 @@
 #include <System.Classes.hpp>
 #include <System.Contnrs.hpp>
 
-#include "DP_RepSettingsDB.h"
-#include "DP_RepSettingsMail.h"
-
 // ---------------------------------------------------------------------------
 class TSettings : public TObject {
 private:

@@ -61,8 +61,12 @@ private: // User declarations
 
 	TSettings* Settings;
 
+	TObjectList* DBResults;
+
 	TDateTime DateTimeFrom;
 	TDateTime DateTimeTo;
+
+	void LoadSettings();
 
 	bool CheckForSave();
 	bool Ping(String HostAddr);

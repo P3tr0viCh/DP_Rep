@@ -2,12 +2,15 @@
 
 #pragma hdrstop
 
-#include "DP_RepSettings.h"
+#include <UtilsStr.h>
+#include <UtilsFileIni.h>
 
 #include "DP_RepAdd.h"
 
-#include "UtilsStr.h"
-#include "UtilsFileIni.h"
+#include "DP_RepSettingsDB.h"
+#include "DP_RepSettingsMail.h"
+
+#include "DP_RepSettings.h"
 
 // ---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -19,7 +22,7 @@ __fastcall TSettings::TSettings() {
 
 	FReportType = 0;
 
-	FMailUseUTF8 = false;
+	FMailUseUTF8 = true;
 	FMailClient = "";
 	FMailSubject = "";
 }

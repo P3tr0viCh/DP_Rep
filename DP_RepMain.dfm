@@ -35,7 +35,6 @@ object Main: TMain
     SimplePanel = True
     SimpleText = #169' '#1050#1086#1085#1089#1090#1072#1085#1090#1080#1085' '#1044#1091#1088#1072#1077#1074' ('#1059#1088#1072#1083#1100#1089#1082#1072#1103' '#1057#1090#1072#1083#1100', '#1062#1042#1058#1057')'
     UseSystemFont = False
-    ExplicitTop = 389
   end
   object ToolBar: TToolBar
     Left = 0
@@ -123,7 +122,6 @@ object Main: TMain
     Caption = #1044#1072#1090#1072':'
     TabOrder = 2
     StyleElements = [seFont, seClient]
-    ExplicitTop = 81
     DesignSize = (
       522
       46)
@@ -270,8 +268,6 @@ object Main: TMain
     ScrollBars = ssBoth
     TabOrder = 0
     WordWrap = False
-    ExplicitTop = 127
-    ExplicitHeight = 267
   end
   object ImageList: TImageList
     Height = 48
@@ -279,7 +275,7 @@ object Main: TMain
     Left = 37
     Top = 146
     Bitmap = {
-      494C010105000900500030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010105000900540030003000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C00000006000000001002000000000000020
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

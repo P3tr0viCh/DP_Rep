@@ -9,10 +9,6 @@
 
 #pragma hdrstop
 
-#include "DP_RepMain.h"
-#include "DP_RepAdd.h"
-#include "DP_RepStrings.h"
-
 #include <AboutFrm.h>
 
 #include <UtilsMisc.h>
@@ -20,6 +16,15 @@
 #include <UtilsStr.h>
 #include <UtilsFiles.h>
 #include <UtilsKAndM.h>
+
+#include "DP_RepAdd.h"
+#include "DP_RepStrings.h"
+
+#include "DP_RepSettingsDB.h"
+#include "DP_RepSettingsMail.h"
+#include "DP_RepDBResult.h"
+
+#include "DP_RepMain.h"
 
 // ---------------------------------------------------------------------------
 #pragma package(smart_init)
@@ -42,6 +47,8 @@ void __fastcall TMain::tbtnCloseClick(TObject *Sender) {
 void __fastcall TMain::FormCreate(TObject *Sender) {
 	DateTimePicker->Date = Date() - 1;
 
+	DateTimePicker->Date = EncodeDate(2015, 01, 01);
+
 	TFileIni* FileIni = TFileIni::GetNewInstance();
 	try {
 		FileIni->ReadFormBounds(this);
@@ -50,16 +57,17 @@ void __fastcall TMain::FormCreate(TObject *Sender) {
 		delete FileIni;
 	}
 
+	DBResults = new TObjectList();
+
 	Settings = new TSettings();
-	Settings->Load();
+
+	LoadSettings();
 
 	UpdateDateTime();
 }
+
 // ---------------------------------------------------------------------------
-
 void __fastcall TMain::FormDestroy(TObject *Sender) {
-	Settings->Free();
-
 	TFileIni* FileIni = TFileIni::GetNewInstance();
 	try {
 		FileIni->WriteFormBounds(this);
@@ -67,6 +75,10 @@ void __fastcall TMain::FormDestroy(TObject *Sender) {
 	__finally {
 		delete FileIni;
 	}
+
+	Settings->Free();
+
+	DBResults->Free();
 }
 
 // ---------------------------------------------------------------------------
@@ -105,8 +117,8 @@ void __fastcall TMain::FormShow(TObject *Sender) {
 		}
 	}
 }
-// ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
 void __fastcall TMain::btnDatePrevClick(TObject * Sender) {
 	DateTimePicker->Date = DateTimePicker->Date + ((TSpeedButton*) Sender)->Tag;
 
@@ -114,14 +126,26 @@ void __fastcall TMain::btnDatePrevClick(TObject * Sender) {
 
 	UpdateDateTime();
 }
-// ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+void TMain::LoadSettings() {
+	Settings->Load();
+
+	DBResults->Clear();
+
+	for (int i = 0; i < Settings->DBs->Count; i++) {
+		DBResults->Add(new TDBResult(Connection, Query,
+			(TDB*)Settings->DBs->List[i]));
+	}
+}
+
+// ---------------------------------------------------------------------------
 void __fastcall TMain::DateTimePickerChange(TObject * Sender) {
 	Memo->Clear();
 	UpdateDateTime();
 }
-// ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
 void TMain::UpdateDateTime() {
 	TDateTime ADate = DateTimePicker->Date;
 
@@ -148,12 +172,13 @@ void TMain::UpdateDateTime() {
 		ARRAYOFCONST((DTToS(DateTimeFrom), DTToS(DateTimeTo))));
 }
 
+// ---------------------------------------------------------------------------
 void __fastcall TMain::tbtnAboutClick(TObject * Sender) {
 	ShowAbout(14, MAXBYTE, MAXBYTE, MAXBYTE, NULL, NULL, NULL, NULL, NULL,
 		LoadStr(IDS_COPYRIGHT));
 }
-// ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
 void __fastcall TMain::FormKeyDown(TObject * Sender, WORD & Key,
 	TShiftState Shift) {
 	if (!Memo->Enabled) {
@@ -177,8 +202,8 @@ void __fastcall TMain::FormKeyDown(TObject * Sender, WORD & Key,
 		}
 	}
 }
-// ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
 bool TMain::CheckForSave() {
 	bool Result = Memo->Lines->Text.IsEmpty();
 	if (Result) {
@@ -188,15 +213,24 @@ bool TMain::CheckForSave() {
 	return Result;
 }
 
+// ---------------------------------------------------------------------------
 void TMain::ReportSave() {
 	if (CheckForSave()) {
 		return;
 	}
 
-	Memo->Lines->SaveToFile(FileInAppDir(Format("%s.txt",
-		DToS(DateTimePicker->Date))));
+	String FileName = FileInAppDir(Format("%s.txt", DToS(DateTimeFrom)));
+	try {
+		Memo->Lines->SaveToFile(FileName);
+
+		MsgBox(Format(IDS_FILESAVE_OK, ARRAYOFCONST((FileName))));
+	}
+	catch (...) {
+		MsgBoxErr(Format(IDS_FILESAVE_ERROR, ARRAYOFCONST((FileName))));
+	}
 }
 
+// ---------------------------------------------------------------------------
 bool TMain::Ping(String HostAddr) {
 	bool Result;
 
@@ -239,9 +273,10 @@ bool TMain::Ping(String HostAddr) {
 	return Result;
 }
 
+// ---------------------------------------------------------------------------
 int TMain::CheckPing() {
 	int Result = ID_NO;
-	String Host, Phone, S = "";
+	String Host, Phone, S;
 
 	ShowWaitCursor();
 
@@ -253,7 +288,7 @@ int TMain::CheckPing() {
 
 		Host = DB->Ping;
 
-		if (Host != "") {
+		if (!IsEmpty(Host)) {
 			if (!Ping(Host)) {
 				S = ConcatStrings(S, Format(IDS_PING_ERROR,
 					ARRAYOFCONST((DB->Name, DB->Phone))),
@@ -265,7 +300,7 @@ int TMain::CheckPing() {
 
 	RestoreCursor();
 
-	if (S != "") {
+	if (!IsEmpty(S)) {
 		Result = MsgBox(S + sLineBreak + sLineBreak + LoadStr(IDS_PING_RESULT),
 			MB_YESNOCANCEL | MB_ICONQUESTION);
 	}
@@ -273,9 +308,8 @@ int TMain::CheckPing() {
 	return Result;
 }
 
+// ---------------------------------------------------------------------------
 bool TMain::ReportUpdate() {
-	int i, line;
-	String S = "", Name = "", DBResult, DBResultOK, DBResultError;
 	bool Result = true;
 
 	ShowWaitCursor();
@@ -289,56 +323,62 @@ bool TMain::ReportUpdate() {
 
 		Memo->Lines->Clear();
 
-		Memo->Lines->Add(LoadStr(IDS_UPDATE_WAIT) + sLineBreak);
+		Memo->Lines->Add(LoadStr(IDS_UPDATE_CAPTION) + sLineBreak);
 
-		ProcMess();
+		String UpdateStatusWait = LoadStr(IDS_UPDATE_STATUS_WAIT);
+		String UpdateStatusLoad = LoadStr(IDS_UPDATE_STATUS_LOAD);
+		String DBResultOK = LoadStr(IDS_UPDATE_STATUS_OK);
+		String DBResultError = LoadStr(IDS_UPDATE_STATUS_ERROR);
+		String DBResultMessage;
 
-		if (Settings->ReportType == 1) {
-			S = Format(IDS_REPORT_CAPTION_1,
-				ARRAYOFCONST((DTToS(DateTimeFrom), DTToS(DateTimeTo))));
+		TDBResult* DBResult;
+
+		int *NumLines = new int[DBResults->Count];
+
+		for (int i = 0; i < DBResults->Count; i++) {
+			DBResult = (TDBResult*)DBResults->List[i];
+
+			NumLines[i] =
+				Memo->Lines->Add(Format(IDS_UPDATE_STATUS,
+				ARRAYOFCONST((DBResult->DB->Name, UpdateStatusWait))) +
+				sLineBreak);
 		}
-		else {
-			S = Format(IDS_REPORT_CAPTION_0, DToS(DateTimeFrom));
-		}
 
-		S += sLineBreak;
+		for (int i = 0; i < DBResults->Count; i++) {
+			DBResult = (TDBResult*)DBResults->List[i];
 
-		DBResultOK = LoadStr(IDS_UPDATE_OK);
-		DBResultError = LoadStr(IDS_UPDATE_ERROR);
-
-		TDB* DB;
-		for (int i = 0; i < Settings->DBs->Count; i++) {
-			DB = (TDB*)Settings->DBs->List[i];
+			Memo->Lines->Strings[NumLines[i]] =
+				Format(IDS_UPDATE_STATUS,
+				ARRAYOFCONST((DBResult->DB->Name, UpdateStatusLoad)));
 
 			ProcMess();
 
-			Name = DB->Name;
-
-			S = S + sLineBreak + Name + sLineBreak;
-
-			line = Memo->Lines->Add(Name + "... ");
-
-			if (LoadData(DB->Path, DateTimeFrom, DateTimeTo, S)) {
-				DBResult = DBResultOK;
+			if (DBResult->LoadData(DateTimeFrom, DateTimeTo)) {
+				DBResultMessage = DBResultOK;
 			}
 			else {
 				Result = false;
-				DBResult = DBResultError;
+				DBResultMessage = DBResultError;
 			}
 
-			Memo->Lines->Strings[line] = Memo->Lines->Strings[line] + DBResult +
-				sLineBreak;
-
 			// Delay(2000);
+
+			Memo->Lines->Strings[NumLines[i]] =
+				Format(IDS_UPDATE_STATUS,
+				ARRAYOFCONST((DBResult->DB->Name, DBResultMessage)));
+
 		}
+
+		delete[]NumLines;
 	}
 	catch (Exception *E) {
-		S = E->Message;
+		MsgBoxErr(E->Message);
 	}
 
 	Delay(200);
 
-	Memo->Text = S;
+	Memo->Text = FormatDBResult(DBResults, Settings, NULL, DateTimeFrom,
+		DateTimeTo);
 
 	tbtnUpdate->Enabled = true;
 	tbtnMail->Enabled = true;
@@ -350,6 +390,7 @@ bool TMain::ReportUpdate() {
 	return Result;
 }
 
+// ---------------------------------------------------------------------------
 void TMain::ReportMail() {
 	if (CheckForSave()) {
 		return;
@@ -374,7 +415,8 @@ void TMain::ReportMail() {
 
 			S = Format(IDS_MAIL_TO,
 				ARRAYOFCONST((Mail->Address, StrToUrl(Settings->MailSubject,
-				Settings->MailUseUTF8), StrToUrl(Memo->Lines->Text,
+				Settings->MailUseUTF8), StrToUrl(FormatDBResult(DBResults,
+				Settings, Mail->Filter, DateTimeFrom, DateTimeTo),
 				Settings->MailUseUTF8))));
 
 			ShellExec(S);
@@ -387,11 +429,12 @@ void TMain::ReportMail() {
 	RestoreCursor();
 }
 
+// ---------------------------------------------------------------------------
 void __fastcall TMain::miCopyClick(TObject * Sender) {
 	CopyToClipBoard(Memo->Lines->Text);
 }
-// ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
 void __fastcall TMain::tbtnUpdateClick(TObject * Sender) {
 	int Result;
 
@@ -404,14 +447,13 @@ void __fastcall TMain::tbtnUpdateClick(TObject * Sender) {
 		ReportUpdate();
 	}
 }
-// ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
 void __fastcall TMain::tbtnMailClick(TObject * Sender) {
 	ReportMail();
 }
-// ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
 void __fastcall TMain::tbtnSaveClick(TObject * Sender) {
 	ReportSave();
 }
-// ---------------------------------------------------------------------------

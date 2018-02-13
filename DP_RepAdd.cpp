@@ -4,96 +4,20 @@
 
 #include <System.SysUtils.hpp>
 
-#include "DP_RepMain.h"
-
-#include "DP_RepAdd.h"
-#include "DP_RepPass.h"
-#include "DP_RepStrings.h"
-
 #include <UtilsMisc.h>
 #include <UtilsStr.h>
+
+#include "DP_RepStrings.h"
+
+#include "DP_RepAdd.h"
+
+#include "DP_RepDBResult.h"
 
 // ---------------------------------------------------------------------------
 #pragma package(smart_init)
 
-bool LoadData(String AFolderName, TDateTime ADateFrom, TDateTime ADateTo,
-	String &ARecords) {
-	String DB, S = "";
-
-	bool Result;
-
-	if (IsEmpty(AFolderName)) {
-		return false;
-	}
-
-	ProcMess();
-
-	DB = IncludeTrailingPathDelimiter(AFolderName) + "Base.mdb";
-
-	Result = FileExists(DB);
-	if (Result) {
-		Main->Connection->ConnectionString =
-			Format(IDS_SQL_CONNECTION, ARRAYOFCONST((DB, PASSWORD)));
-
-		// S = Main->Connection->ConnectionString; Result = false;
-
-		try {
-			Main->Connection->Open();
-		}
-		catch (Exception *E) {
-			S = Format(IDS_ERROR_DB_OPEN, E->Message);
-			Result = false;
-		}
-
-		if (Result) {
-			Main->Query->SQL->Clear();
-
-			Main->Query->SQL->Add(Format(IDS_SQL_QUERY,
-				ARRAYOFCONST((DateTimeToMDBStr(ADateFrom),
-				DateTimeToMDBStr(ADateTo)))));
-
-			// S = Main->Query->SQL[0][0]; Result = false;
-
-			try {
-				Main->Query->Open();
-			}
-			catch (Exception *E) {
-				S = Format(IDS_ERROR_DB_LOAD, E->Message);
-				Result = false;
-			}
-
-			if (Result) {
-				while (!Main->Query->Eof) {
-					S = S + sDot + Format(IDS_DB_RECORD,
-						ARRAYOFCONST((Main->Query->Fields->Fields[0]->AsString,
-						FmtFloat(Main->Query->Fields->Fields[1]->AsFloat)))) +
-						sLineBreak;
-					Main->Query->Next();
-				}
-
-				if (IsEmpty(S)) {
-					S = sDot + LoadStr(IDS_DB_NO_RECORDS) + sLineBreak;
-				}
-			}
-		}
-	}
-	else {
-		S = Format(IDS_ERROR_DB_NOT_EXISTS, DB);
-	}
-
-	if (Result) {
-		ARecords = ARecords + S;
-	}
-	else {
-		ARecords = ARecords + sDot + S + sLineBreak;
-	}
-
-	Main->Query->Close();
-	Main->Connection->Close();
-
-	return Result;
-}
-
+// ---------------------------------------------------------------------------
+// TODO: Переделать эту шляпу >:[
 String StrToUrl(String S, bool UseUTF8) {
 	int Code, i;
 	String Result = "";
@@ -102,14 +26,14 @@ String StrToUrl(String S, bool UseUTF8) {
 		UTF8String U = S;
 
 		for (i = 1; i <= U.Length(); i++) {
-			if ((U[i] >= 'A' & U[i] <= 'Z') | (U[i] >= 'a' & U[i] <= 'z') |
-				(U[i] >= '0' & U[i] <= '9')) {
+			if ((U[i] >= 'A' && U[i] <= 'Z') || (U[i] >= 'a' && U[i] <= 'z') ||
+				(U[i] >= '0' && U[i] <= '9')) {
 				Result = Result + U[i];
 			}
 			else
 				switch (U[i]) {
 				case '\r':
-					break; // TODO
+					break; // TODO: Забыл, к чему это todo :(
 				case '!':
 				case '*':
 				case '\'':
@@ -138,22 +62,24 @@ String StrToUrl(String S, bool UseUTF8) {
 				default:
 					Code = U[i];
 
-					if (Code < 0)
+					if (Code < 0) {
 						Code += 256;
+					}
+					
 					Result = Result + '%' + IntToHex(Code, 2);
 				}
 		} // for
 	}
 	else {
-		AnsiString U = S;
+		AnsiString A = S;
 
-		for (i = 1; i <= U.Length(); i++) {
-			if ((U[i] >= 'A' & U[i] <= 'Z') | (U[i] >= 'a' & U[i] <= 'z') |
-				(U[i] >= '0' & U[i] <= '9')) {
-				Result = Result + U[i];
+		for (i = 1; i <= A.Length(); i++) {
+			if ((A[i] >= 'A' && A[i] <= 'Z') || (A[i] >= 'a' && A[i] <= 'z') ||
+				(A[i] >= '0' && A[i] <= '9')) {
+				Result = Result + A[i];
 			}
 			else
-				switch (U[i]) {
+				switch (A[i]) {
 				case '\r':
 					break; // TODO
 				case '!':
@@ -179,13 +105,15 @@ String StrToUrl(String S, bool UseUTF8) {
 				case '_':
 				case '.':
 				case '~':
-					Result = Result + U[i];
+					Result = Result + A[i];
 					break;
 				default:
-					Code = U[i];
+					Code = A[i];
 
-					if (Code < 0)
+					if (Code < 0) {
 						Code += 256;
+					}
+					
 					Result = Result + '%' + IntToHex(Code, 2);
 				}
 		} // for
@@ -194,22 +122,27 @@ String StrToUrl(String S, bool UseUTF8) {
 	return Result;
 }
 
+// ---------------------------------------------------------------------------
 String DToS(TDate ADate) {
 	return FormatDateTime("yyyy.mm.dd", ADate);
 }
 
+// ---------------------------------------------------------------------------
 String DTToS(TDateTime ADateTime) {
 	return FormatDateTime("yyyy/mm/dd hh:nn", ADateTime);
 }
 
+// ---------------------------------------------------------------------------
 String DateTimeToMDBStr(TDateTime ADateTime) {
 	return FormatDateTime("M'/'d'/'yyyy' 'h':'n':'s", ADateTime);
 }
 
+// ---------------------------------------------------------------------------
 String FmtFloat(Double Value) {
 	return FormatFloat("0.00", Value);
 }
 
+// ---------------------------------------------------------------------------
 void Split(TStringList* AOut, String S, String Separator) {
 	if (IsEmpty(S)) {
 		return;
@@ -232,4 +165,86 @@ void Split(TStringList* AOut, String S, String Separator) {
 		}
 	}
 	while (!IsEmpty(S));
+}
+
+// ---------------------------------------------------------------------------
+String FormatDBResult(TObjectList * DBResults, TSettings * Settings,
+	TStringList * Filter, TDateTime ADateTimeFrom, TDateTime ADateTimeTo) {
+	String Result = "";
+
+	TDBResult* DBResult;
+	TDBRecord* DBRecord;
+
+	String Product;
+
+	bool UseFilter = Filter != NULL && Filter->Count > 0;
+
+	String SDBResult;
+
+	for (int i = 0; i < DBResults->Count; i++) {
+		DBResult = (TDBResult*)DBResults->List[i];
+
+		SDBResult = "";
+
+		if (IsEmpty(DBResult->ErrorMessage)) {
+			if (DBResult->Records->Count > 0) {
+				for (int i = 0; i < DBResult->Records->Count; i++) {
+					DBRecord = (TDBRecord*)DBResult->Records->List[i];
+
+					Product = DBRecord->Product;
+
+					if (UseFilter) {
+						if (Filter->IndexOf(Product) >= 0) {
+							SDBResult +=
+								sDot + Format(IDS_DB_RECORD,
+								ARRAYOFCONST((Product,
+								FmtFloat(DBRecord->Weigh)))) + sLineBreak;
+						}
+					}
+					else {
+						SDBResult +=
+							sDot + Format(IDS_DB_RECORD,
+							ARRAYOFCONST((Product, FmtFloat(DBRecord->Weigh))))
+							+ sLineBreak;
+					}
+				}
+			}
+			else {
+				if (!UseFilter) {
+					SDBResult = sDot + LoadStr(IDS_DB_NO_RECORDS) + sLineBreak;
+				}
+			}
+		}
+		else {
+			if (!UseFilter) {
+				SDBResult = sDot + DBResult->ErrorMessage + sLineBreak;
+			}
+		}
+
+		if (!IsEmpty(SDBResult)) {
+			SDBResult = sLineBreak + DBResult->DB->Name + sLineBreak +
+				SDBResult;
+		}
+
+		Result += SDBResult;
+	}
+
+	String ReportCaption;
+	if (Settings->ReportType == 1) {
+		ReportCaption = Format(IDS_REPORT_CAPTION_1,
+			ARRAYOFCONST((DTToS(ADateTimeFrom), DTToS(ADateTimeTo))));
+	}
+	else {
+		ReportCaption = Format(IDS_REPORT_CAPTION_0, DToS(ADateTimeFrom));
+	}
+	ReportCaption += sLineBreak;
+
+	if (IsEmpty(Result)) {
+		Result = sLineBreak;
+		Result += sDot + LoadStr(IDS_DB_NO_RECORDS) + sLineBreak;
+	}
+
+	Result = ReportCaption + Result;
+
+	return Result;
 }
