@@ -47,7 +47,7 @@ void __fastcall TMain::tbtnCloseClick(TObject *Sender) {
 void __fastcall TMain::FormCreate(TObject *Sender) {
 	DateTimePicker->Date = Date() - 1;
 
-	DateTimePicker->Date = EncodeDate(2015, 01, 01);
+//	DateTimePicker->Date = EncodeDate(2015, 01, 01);
 
 	TFileIni* FileIni = TFileIni::GetNewInstance();
 	try {
