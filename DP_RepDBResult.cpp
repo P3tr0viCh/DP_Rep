@@ -2,8 +2,9 @@
 
 #pragma hdrstop
 
-#include <UtilsMisc.h>
+#include <UtilsLog.h>
 #include <UtilsStr.h>
+#include <UtilsMisc.h>
 
 #include "DP_RepPass.h"
 #include "DP_RepStrings.h"
@@ -22,7 +23,7 @@ __fastcall TDBResult::TDBResult(TADOConnection* AConnection, TADOQuery* AQuery,
 
 	FDB = ADB;
 
-	FRecords = new TObjectList();
+	FRecords = new TDBRecordList();
 
 	Clear();
 }
@@ -40,26 +41,27 @@ void TDBResult::Clear() {
 }
 
 // ---------------------------------------------------------------------------
-bool TDBResult::LoadData(TDateTime ADateTimeFrom, TDateTime ADateTimeTo) {
+bool TDBResult::InternalLoadData(TDateTime ADateTimeFrom, TDateTime ADateTimeTo)
+{
 	Clear();
 
-	String DB = FDB->Path;
+	String DBPath = DB->Path;
 
-	if (IsEmpty(DB)) {
+	if (IsEmpty(DBPath)) {
 		FErrorMessage = LoadStr(IDS_ERROR_DB_PATH_NOT_EXISTS);
 		return false;
 	}
 
-	DB = IncludeTrailingPathDelimiter(DB) + "Base.mdb";
+	DBPath = IncludeTrailingPathDelimiter(DBPath) + "Base.mdb";
 
-	if (!FileExists(DB)) {
-		FErrorMessage = Format(IDS_ERROR_DB_NOT_EXISTS, DB);
+	if (!FileExists(DBPath)) {
+		FErrorMessage = Format(IDS_ERROR_DB_NOT_EXISTS, DBPath);
 		return false;
 	}
 
 	try {
 		FConnection->ConnectionString =
-			Format(IDS_SQL_CONNECTION, ARRAYOFCONST((DB, PASSWORD)));
+			Format(IDS_SQL_CONNECTION, ARRAYOFCONST((DBPath, PASSWORD)));
 
 		FConnection->Open();
 	}
@@ -98,3 +100,23 @@ bool TDBResult::LoadData(TDateTime ADateTimeFrom, TDateTime ADateTimeTo) {
 
 	return true;
 }
+
+// ---------------------------------------------------------------------------
+bool TDBResult::LoadData(TDateTime ADateTimeFrom, TDateTime ADateTimeTo) {
+	WriteToLog(Format(IDS_LOG_LOAD_DATA_START, DB->Name));
+
+	bool Result = InternalLoadData(ADateTimeFrom, ADateTimeTo);
+
+	if (Result) {
+		WriteToLog(Format(IDS_LOG_LOAD_DATA_END_OK,
+			ARRAYOFCONST((DB->Name, LoadStr(IDS_LOG_OK)))));
+	}
+	else {
+		WriteToLog(Format(IDS_LOG_LOAD_DATA_END_FAIL,
+			ARRAYOFCONST((DB->Name, LoadStr(IDS_LOG_FAIL), ErrorMessage))));
+	}
+
+	return Result;
+}
+
+// ---------------------------------------------------------------------------

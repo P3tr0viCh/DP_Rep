@@ -61,7 +61,7 @@ private: // User declarations
 
 	TSettings* Settings;
 
-	TObjectList* DBResults;
+	TDBResultList* DBResults;
 
 	TDateTime DateTimeFrom;
 	TDateTime DateTimeTo;

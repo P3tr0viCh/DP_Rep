@@ -9,6 +9,8 @@
 #include <Data.DB.hpp>
 #include <Data.Win.ADODB.hpp>
 
+#include <ObjList.h>
+
 #include "DP_RepSettingsDB.h"
 
 // ---------------------------------------------------------------------------
@@ -28,6 +30,9 @@ public:
 };
 
 // ---------------------------------------------------------------------------
+typedef TObjList<TDBRecord> TDBRecordList;
+
+// ---------------------------------------------------------------------------
 class TDBResult : public TObject {
 private:
 	TADOConnection* FConnection;
@@ -37,9 +42,11 @@ private:
 
 	String FErrorMessage;
 
-	TObjectList* FRecords;
+	TDBRecordList* FRecords;
 
 	void Clear();
+
+	bool InternalLoadData(TDateTime ADateTimeFrom, TDateTime ADateTimeTo);
 
 public:
 	__fastcall TDBResult(TADOConnection* AConnection, TADOQuery* AQuery,
@@ -52,8 +59,11 @@ public:
 
 	__property TDB* DB = {read = FDB};
 
-	__property TObjectList* Records = {read = FRecords};
+	__property TDBRecordList* Records = {read = FRecords};
 };
+
+// ---------------------------------------------------------------------------
+typedef TObjList<TDBResult> TDBResultList;
 
 // ---------------------------------------------------------------------------
 #endif

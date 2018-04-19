@@ -8,11 +8,12 @@
 #define IDS_REPORT_CAPTION_0			1000
 #define IDS_REPORT_CAPTION_1			1001
 
-#define IDS_ERROR_MEMO_CLEAR			1100
+#define IDS_ERROR_MEMO_EMPTY			1100
 #define IDS_ERROR_DB_PATH_NOT_EXISTS	1101
 #define IDS_ERROR_DB_NOT_EXISTS 		1102
 #define IDS_ERROR_DB_OPEN     			1103
 #define IDS_ERROR_DB_LOAD       		1104
+#define IDS_ERROR_DB_LIST_EMPTY			1105
 
 #define IDS_MAIL_TO						1200
 
@@ -36,6 +37,16 @@
 
 #define IDS_FILESAVE_OK      			1900
 #define IDS_FILESAVE_ERROR				1901
+
+#define IDS_LOG_START_PROGRAM			2000
+#define IDS_LOG_STOP_PROGRAM			2001
+#define IDS_LOG_OK						2002
+#define IDS_LOG_FAIL					2003
+#define IDS_LOG_DB_LIST_EMPTY			2004
+#define IDS_LOG_PING					2005
+#define IDS_LOG_LOAD_DATA_START			2006
+#define IDS_LOG_LOAD_DATA_END_OK		2007
+#define IDS_LOG_LOAD_DATA_END_FAIL		2008
 
 // ---------------------------------------------------------------------------
 #endif

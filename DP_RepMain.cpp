@@ -11,11 +11,12 @@
 
 #include <AboutFrm.h>
 
-#include <UtilsMisc.h>
-#include <UtilsFileIni.h>
+#include <UtilsLog.h>
 #include <UtilsStr.h>
-#include <UtilsFiles.h>
+#include <UtilsMisc.h>
 #include <UtilsKAndM.h>
+#include <UtilsFiles.h>
+#include <UtilsFileIni.h>
 
 #include "DP_RepAdd.h"
 #include "DP_RepStrings.h"
@@ -45,9 +46,12 @@ void __fastcall TMain::tbtnCloseClick(TObject *Sender) {
 // ---------------------------------------------------------------------------
 
 void __fastcall TMain::FormCreate(TObject *Sender) {
+	WriteToLog(Format(IDS_LOG_START_PROGRAM,
+		ARRAYOFCONST((GetFileVer(Application->ExeName, false)))));
+
 	DateTimePicker->Date = Date() - 1;
 
-//	DateTimePicker->Date = EncodeDate(2015, 01, 01);
+	// DateTimePicker->Date = EncodeDate(2015, 01, 01);
 
 	TFileIni* FileIni = TFileIni::GetNewInstance();
 	try {
@@ -57,7 +61,7 @@ void __fastcall TMain::FormCreate(TObject *Sender) {
 		delete FileIni;
 	}
 
-	DBResults = new TObjectList();
+	DBResults = new TDBResultList();
 
 	Settings = new TSettings();
 
@@ -79,6 +83,8 @@ void __fastcall TMain::FormDestroy(TObject *Sender) {
 	Settings->Free();
 
 	DBResults->Free();
+
+	WriteToLog(IDS_LOG_STOP_PROGRAM);
 }
 
 // ---------------------------------------------------------------------------
@@ -207,7 +213,7 @@ void __fastcall TMain::FormKeyDown(TObject * Sender, WORD & Key,
 bool TMain::CheckForSave() {
 	bool Result = Memo->Lines->Text.IsEmpty();
 	if (Result) {
-		MsgBoxErr(LoadStr(IDS_ERROR_MEMO_CLEAR));
+		MsgBoxErr(IDS_ERROR_MEMO_EMPTY);
 	}
 
 	return Result;
@@ -223,10 +229,10 @@ void TMain::ReportSave() {
 	try {
 		Memo->Lines->SaveToFile(FileName);
 
-		MsgBox(Format(IDS_FILESAVE_OK, ARRAYOFCONST((FileName))));
+		MsgBox(Format(IDS_FILESAVE_OK, FileName));
 	}
 	catch (...) {
-		MsgBoxErr(Format(IDS_FILESAVE_ERROR, ARRAYOFCONST((FileName))));
+		MsgBoxErr(Format(IDS_FILESAVE_ERROR, FileName));
 	}
 }
 
@@ -277,6 +283,7 @@ bool TMain::Ping(String HostAddr) {
 int TMain::CheckPing() {
 	int Result = ID_NO;
 	String Host, Phone, S;
+	bool PingResult;
 
 	ShowWaitCursor();
 
@@ -289,13 +296,17 @@ int TMain::CheckPing() {
 		Host = DB->Ping;
 
 		if (!IsEmpty(Host)) {
-			if (!Ping(Host)) {
+			PingResult = Ping(Host);
+
+			if (!PingResult) {
 				S = ConcatStrings(S, Format(IDS_PING_ERROR,
 					ARRAYOFCONST((DB->Name, DB->Phone))),
 					(String) sLineBreak + (String) sLineBreak);
 			}
-		}
 
+			WriteToLog(Format(IDS_LOG_PING, ARRAYOFCONST((DB->Name, DB->Ping,
+				PingResult ? LoadStr(IDS_LOG_OK) : LoadStr(IDS_LOG_FAIL)))));
+		}
 	}
 
 	RestoreCursor();
@@ -310,6 +321,14 @@ int TMain::CheckPing() {
 
 // ---------------------------------------------------------------------------
 bool TMain::ReportUpdate() {
+	if (DBResults->IsEmpty()) {
+		WriteToLog(IDS_LOG_DB_LIST_EMPTY);
+
+		MsgBoxErr(IDS_ERROR_DB_LIST_EMPTY);
+
+		return false;
+	}
+
 	bool Result = true;
 
 	ShowWaitCursor();

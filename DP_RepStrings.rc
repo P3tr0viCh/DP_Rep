@@ -5,7 +5,7 @@ BEGIN
 IDS_COPYRIGHT,
         "© Константин Дураев (Уральская Сталь, ЦВТС)|@P3tr0viCh@mail.ru"
 
-IDS_ERROR_MEMO_CLEAR,
+IDS_ERROR_MEMO_EMPTY,
         "Нельзя сохранять или отправлять по почте пустой отчёт"
 IDS_MAIL_TO,
         "MAILTO:%s?SUBJECT=%s&BODY=%s"
@@ -19,7 +19,7 @@ IDS_REPORT_CAPTION_0,
 IDS_REPORT_CAPTION_1,
         "Загрузка доменных печей с %s по %s"
 
-IDS_UPDATE_CAPTION
+IDS_UPDATE_CAPTION,
         "Получение данных..."
 IDS_UPDATE_STATUS,
         "%s: %s"
@@ -27,37 +27,58 @@ IDS_UPDATE_STATUS_WAIT,
         "Ожидание очереди"
 IDS_UPDATE_STATUS_LOAD,
         "Загрузка данных"
-IDS_UPDATE_STATUS_OK
+IDS_UPDATE_STATUS_OK,
         "Готово"
-IDS_UPDATE_STATUS_ERROR
+IDS_UPDATE_STATUS_ERROR,
         "Ошибка"
 
 IDS_ERROR_DB_OPEN,
         "Произошла ошибка во время открытия базы данных: ""%s"""
 IDS_ERROR_DB_LOAD,
         "Не удалось получить данные, так как произошла ошибка: ""%s"""
+IDS_ERROR_DB_LIST_EMPTY,
+        "Базы данных не указаны"
 
-IDS_DB_NO_RECORDS
+IDS_DB_NO_RECORDS,
         "Нет данных"
-IDS_DB_RECORD
+IDS_DB_RECORD,
         "%s: %s т."
 
-IDS_PING_ERROR
+IDS_PING_ERROR,
         "%s не отвечает.\nТелефон: %s"
-IDS_PING_RESULT
+IDS_PING_RESULT,
         "Повторить проверку доступности?"
 
-IDS_DATETIME_LABEL
+IDS_DATETIME_LABEL,
         "%s — %s"
 
-IDS_FILESAVE_OK
+IDS_FILESAVE_OK,
         "Файл ""%s"" сохранён"
-IDS_FILESAVE_ERROR
+IDS_FILESAVE_ERROR,
         "Не удалось сохранить файл ""%s"""
 
-IDS_SQL_CONNECTION
+IDS_SQL_CONNECTION,
         "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=%s;Persist Security Info=False;User ID=Admin;Jet OLEDB:Database Password=%s;"
-IDS_SQL_QUERY
+IDS_SQL_QUERY,
         "SELECT Products.Product, Sum(Measures.Weigh) AS [Sum-Weigh], Count(Measures.ID) AS [Count-ID] FROM Measures INNER JOIN Products ON Measures.ProductID = Products.ProductID WHERE ((Measures.DT>=#%s# and Measures.DT<=#%s#)) GROUP BY Products.Product"
+
+IDS_LOG_START_PROGRAM,
+        ">>>>>>> START PROGRAM WME %s"
+IDS_LOG_STOP_PROGRAM,
+        "<<<<<<< STOP PROGRAM"
+IDS_LOG_OK,
+        "ok"
+IDS_LOG_FAIL,
+        "fail"
+IDS_LOG_DB_LIST_EMPTY,
+        "error: database list empty"
+IDS_LOG_PING,
+        "ping: %s (%s). result: %s"
+IDS_LOG_LOAD_DATA_START,
+        "start loading: %s"
+IDS_LOG_LOAD_DATA_END_OK,
+        "end loading: %s. result: %s"
+IDS_LOG_LOAD_DATA_END_FAIL,
+        "end loading: %s. result: %s. error: %s"
 
 END
